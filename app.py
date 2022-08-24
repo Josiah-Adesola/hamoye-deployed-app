@@ -45,38 +45,6 @@ def lemma(text):
     lemma_output = ' '.join(WordNetLemmatizer().lemmatize(word) for word in word_list)
     return lemma_output
 
-'''
-def it_predict(title, jobrequirment,requiredqual,  jobdescription, aboutc, company):
-    word = ''
-    col = [title, jobrequirment,requiredqual,  jobdescription, aboutc, company]
-    class_data = word + ' '.join(col)
-    class_df = class_data
-    # class_df = class_df.apply(lambda x : clean_data(str(x)))
-    # class_df_1 = class_df.apply(lambda x : lemma(x))
-    class_df = clean_data(class_df)
-    class_df = lemma(class_df)
-    #stop word removal
-    stop = nltk.corpus.stopwords.words('english')
-    stop.extend(['armenian', 'armenia', 'job', 'title', 'position', 'location', 'responsibility', 'application',
-             'procedure', 'deadline', 'requirement','qualification', 'renumeration', 'salary', 'date', 'company', 'llc',
-             'person', 'employement', 'post', 'follow', 'resume', 'open', 'about', 'announcement', 'link', 'website',
-             'organization', 'duration'])
-    class_df_1 = class_df.join(class_df for class_df in class_df.split() if class_df not in stop)
-    #Tokenization
-    tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
-    x_tdm = tfidf_vect.fit_transform([class_df_1])
-    df_clust = pd.DataFrame(x_tdm.toarray(), columns=tfidf_vect.get_feature_names())
-
-    # prediction = loaded_model.predict(df_clust)
-    # if (prediction == 0):
-    #     print("This is not an IT job")
-    # else:
-    #     print("This is an IT job")
-    return df_clust
-
-'''
-
-
 def main():
     st.title("Armenian Job Posting Prediction")
     st.markdown("A Project by team PP22/J609 Pyspark")
@@ -214,7 +182,7 @@ International Research & Exchanges Board (IREX)
 NetCall Communications
 ""","""Armenia TV
 """])
-
+    action = st.selectbox("Action", ["Word Cloud", "Classification"])
     word = ''
     col = [title, jobrequirment,requiredqual,  jobdescription, aboutc, company]
     class_data = word + ' '.join(col)
@@ -243,35 +211,38 @@ NetCall Communications
     # return df_clust
 
     prediction = ''
-    if st.button('World Cloud'):
-        nlp = spacy.load('en_core_web_sm')
-        # Parse the sentence using the loaded 'en' model object `nlp`
-        doc = nlp(jobdescription)
-        #Tokenization using count vectorizer
-        count_vect = CountVectorizer(ngram_range=(1,1))
-        jobdescription = clean_data(jobdescription)
-        token = count_vect.fit_transform([jobdescription])
-        title_df = " ".join([token.lemma_ for token in doc])
-        title_df = lemma(title_df)
-        title_df = title_df.join(title_df for title_df in title_df.split() if title_df not in stop)
-        temp_df =  pd.DataFrame(token.toarray(), columns=count_vect.get_feature_names())
+    if action == "Word Cloud":
+        if st.button('Prediction'):
+            nlp = spacy.load('en_core_web_sm')
+            # Parse the sentence using the loaded 'en' model object `nlp`
+            doc = nlp(jobdescription)
+            #Tokenization using count vectorizer
+            count_vect = CountVectorizer(ngram_range=(1,1))
+            jobdescription = clean_data(jobdescription)
+            token = count_vect.fit_transform([jobdescription])
+            title_df = " ".join([token.lemma_ for token in doc])
+            title_df = lemma(title_df)
+            title_df = title_df.join(title_df for title_df in title_df.split() if title_df not in stop)
+            temp_df =  pd.DataFrame(token.toarray(), columns=count_vect.get_feature_names())
 
-        count_df = temp_df.apply(lambda x : x.sum())
-        count_df.columns = ['Word', 'Count']
-        top_jobs = count_df.sort_values(by='Count', ascending=False)
-        # plot the WordCloud image to show top 50 type of demanding jobs in armenia     
-        wordcloud = WordCloud(width = 1000, height = 500).generate(' '.join(top_jobs[:50].Word))
-        plt.figure(figsize = (8, 8), facecolor = None) 
-        plt.imshow(wordcloud) 
-        plt.axis("off") 
-        plt.tight_layout(pad = 0) 
-        
-        plt.show()
-        # prediction = loaded_model.predict(df_clust)
-        # if (prediction == 0):
-        #     st.success("This is an IT job")
-        # elif (prediction == 1):
-        #     st.warning("This is not an IT job")
+            count_df = temp_df.apply(lambda x : x.sum())
+            count_df.columns = ['Word', 'Count']
+            top_jobs = count_df.sort_values(by='Count', ascending=False)
+            # plot the WordCloud image to show top 50 type of demanding jobs in armenia     
+            wordcloud = WordCloud(width = 1000, height = 500).generate(' '.join(top_jobs[:50].Word))
+            plt.figure(figsize = (8, 8), facecolor = None) 
+            plt.imshow(wordcloud) 
+            plt.axis("off") 
+            plt.tight_layout(pad = 0) 
+            
+            plt.show()
+    elif action == "Classification":
+        if st.button('Prediction'):
+            prediction = loaded_model.predict(df_clust)
+            if (prediction == 0):
+                st.success("This is an IT job")
+            elif (prediction == 1):
+                st.warning("This is not an IT job")
 
 if __name__ == '__main__':
     main()
