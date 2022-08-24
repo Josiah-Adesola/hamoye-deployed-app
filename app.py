@@ -27,6 +27,8 @@ import streamlit as st
 
 loaded_model = pickle.load(open("rf_model.sav", 'rb'))
 
+vectorizer = pickle.load(open("vectorized.pkl", 'rb'))
+
 def clean_data(text):
     text = text.lower()  # convert all the text into lowercase
     text = text.strip()  #remove starting and trailing whitespaces
@@ -199,9 +201,11 @@ NetCall Communications
              'organization', 'duration'])
     class_df_1 = class_df.join(class_df for class_df in class_df.split() if class_df not in stop)
     #Tokenization
-    tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
-    x_tdm = tfidf_vect.fit_transform([class_df_1])
-    df_clust = pd.DataFrame(x_tdm.toarray(), columns=tfidf_vect.get_feature_names())
+    # tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
+    # x_tdm = tfidf_vect.fit_transform([class_df_1])
+    x_tdm = vectorizer.fit(class_df_1)
+    a = x_tdm.toarray()
+    df_clust = pd.DataFrame(x_tdm.toarray(), columns=vectorizer.get_feature_names())
 
     # prediction = loaded_model.predict(df_clust)
     # if (prediction == 0):
@@ -226,16 +230,18 @@ NetCall Communications
             temp_df =  pd.DataFrame(token.toarray(), columns=count_vect.get_feature_names())
 
             count_df = temp_df.apply(lambda x : x.sum())
+            count_df = pd.DataFrame(count_df).reset_index()
             count_df.columns = ['Word', 'Count']
-            top_jobs = count_df.sort_values('Count', ascending=False)
+            top_jobs = count_df.sort_values(by='Count', ascending=False)
             # plot the WordCloud image to show top 50 type of demanding jobs in armenia     
             wordcloud = WordCloud(width = 1000, height = 500).generate(' '.join(top_jobs[:50].Word))
-            plt.figure(figsize = (8, 8), facecolor = None) 
+            fig = plt.figure(figsize = (8, 8), facecolor = None) 
             plt.imshow(wordcloud) 
             plt.axis("off") 
             plt.tight_layout(pad = 0) 
-            
             plt.show()
+            st.write(fig)
+
     elif action == "Classification":
         if st.button('Prediction'):
             prediction = loaded_model.predict(df_clust)
