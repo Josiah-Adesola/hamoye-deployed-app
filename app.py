@@ -227,7 +227,7 @@ NetCall Communications
 
             count_df = temp_df.apply(lambda x : x.sum())
             count_df.columns = ['Word', 'Count']
-            top_jobs = count_df.sort_values(by='Count', ascending=False)
+            top_jobs = count_df.sort_values('Count', ascending=False)
             # plot the WordCloud image to show top 50 type of demanding jobs in armenia     
             wordcloud = WordCloud(width = 1000, height = 500).generate(' '.join(top_jobs[:50].Word))
             plt.figure(figsize = (8, 8), facecolor = None) 
