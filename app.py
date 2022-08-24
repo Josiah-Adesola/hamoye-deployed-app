@@ -203,7 +203,7 @@ NetCall Communications
     #Tokenization
     # tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
     # x_tdm = tfidf_vect.fit_transform([class_df_1])
-    x_tdm = vectorizer.fit(class_df_1)
+    x_tdm = vectorizer.fit_transform(class_df_1)
     a = x_tdm.toarray()
     df_clust = pd.DataFrame(x_tdm.toarray(), columns=vectorizer.get_feature_names())
 
