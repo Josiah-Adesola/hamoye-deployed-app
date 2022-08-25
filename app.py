@@ -184,35 +184,20 @@ International Research & Exchanges Board (IREX)
 NetCall Communications
 ""","""Armenia TV
 """])
-    action = st.selectbox("Action", ["Word Cloud"])
+    action = st.selectbox("Action", ["Word Cloud", "Classification"])
     word = ''
     col = [title, jobrequirment,requiredqual,  jobdescription, aboutc, company]
     class_data = word + ' '.join(col)
     class_df = class_data
-    # class_df = class_df.apply(lambda x : clean_data(str(x)))
-    # class_df_1 = class_df.apply(lambda x : lemma(x))
-    class_df = clean_data(class_df)
-    class_df = lemma(class_df)
-    #stop word removal
-    stop = nltk.corpus.stopwords.words('english')
-    stop.extend(['armenian', 'armenia', 'job', 'title', 'position', 'location', 'responsibility', 'application',
-             'procedure', 'deadline', 'requirement','qualification', 'renumeration', 'salary', 'date', 'company', 'llc',
-             'person', 'employement', 'post', 'follow', 'resume', 'open', 'about', 'announcement', 'link', 'website',
-             'organization', 'duration'])
-    class_df_1 = class_df.join(class_df for class_df in class_df.split() if class_df not in stop)
+    nlp = spacy.load('en_core_web_sm')
+    docc = nlp(class_df)
     #Tokenization
-    # tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
-    # x_tdm = tfidf_vect.fit_transform([class_df_1])
-    # x_tdm = vectorizer.transform(class_df_1)
-    # a = x_tdm.toarray()
-    # df_clust = pd.DataFrame(x_tdm.toarray(), columns=vectorizer.get_feature_names())
+    tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
+    class_df = clean_data(class_df)
+    x_dtm = tfidf_vect.fit_transform([class_df])
+    xx_dtm = " ".join([x_dtm.lemma_ for x_dtm in doc])
+    df_clust = pd.DataFrame(xx_dtm.toarray(), columns=vectorizer.get_feature_names())
 
-    # prediction = loaded_model.predict(df_clust)
-    # if (prediction == 0):
-    #     print("This is not an IT job")
-    # else:
-    #     print("This is an IT job")
-    # return df_clust
 
     prediction = ''
     if action == "Word Cloud":
@@ -242,13 +227,13 @@ NetCall Communications
             plt.show()
             st.write(fig)
 
-    # elif action == "Classification":
-    #     if st.button('Prediction'):
-            # prediction = loaded_model.predict(df_clust)
-            # if (prediction == 0):
-            #     st.success("This is an IT job")
-            # elif (prediction == 1):
-            #     st.warning("This is not an IT job")
+    elif action == "Classification":
+        if st.button('Prediction'):
+            prediction = loaded_model.predict(df_clust)
+            if (prediction == 0):
+                st.success("This is an IT job")
+            elif (prediction == 1):
+                st.warning("This is not an IT job")
 
 if __name__ == '__main__':
     main()
