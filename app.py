@@ -184,7 +184,7 @@ International Research & Exchanges Board (IREX)
 NetCall Communications
 ""","""Armenia TV
 """])
-    action = st.selectbox("Action", ["Word Cloud", "Classification"])
+    action = st.selectbox("Action", ["Word Cloud"])
     word = ''
     col = [title, jobrequirment,requiredqual,  jobdescription, aboutc, company]
     class_data = word + ' '.join(col)
@@ -203,9 +203,9 @@ NetCall Communications
     #Tokenization
     # tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
     # x_tdm = tfidf_vect.fit_transform([class_df_1])
-    x_tdm = vectorizer.fit_transform(class_df_1)
-    a = x_tdm.toarray()
-    df_clust = pd.DataFrame(x_tdm.toarray(), columns=vectorizer.get_feature_names())
+    # x_tdm = vectorizer.transform(class_df_1)
+    # a = x_tdm.toarray()
+    # df_clust = pd.DataFrame(x_tdm.toarray(), columns=vectorizer.get_feature_names())
 
     # prediction = loaded_model.predict(df_clust)
     # if (prediction == 0):
@@ -242,13 +242,13 @@ NetCall Communications
             plt.show()
             st.write(fig)
 
-    elif action == "Classification":
-        if st.button('Prediction'):
-            prediction = loaded_model.predict(df_clust)
-            if (prediction == 0):
-                st.success("This is an IT job")
-            elif (prediction == 1):
-                st.warning("This is not an IT job")
+    # elif action == "Classification":
+    #     if st.button('Prediction'):
+            # prediction = loaded_model.predict(df_clust)
+            # if (prediction == 0):
+            #     st.success("This is an IT job")
+            # elif (prediction == 1):
+            #     st.warning("This is not an IT job")
 
 if __name__ == '__main__':
     main()
