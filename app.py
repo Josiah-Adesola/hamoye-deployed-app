@@ -190,7 +190,7 @@ NetCall Communications
     class_data = word + ' '.join(col)
     class_df = class_data
     nlp = spacy.load('en_core_web_sm')
-    docc = nlp(class_df)
+    doc = nlp(class_df)
     #Tokenization
     tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
     class_df = clean_data(class_df)
