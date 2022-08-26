@@ -25,7 +25,9 @@ import streamlit as st
 #loading the saved model
 
 
-loaded_model = pickle.load(open("rf_model.sav", 'rb'))
+rf_model = pickle.load(open("models/rf_model.pkl", 'rb'))
+lr_model = pickle.load(open("models/lr_model.pkl", 'rb'))
+dt_model = pickle.load(open("models/dt_model.pkl", 'rb'))
 
 vectorizer = pickle.load(open("vectorized.pkl", 'rb'))
 
@@ -54,186 +56,103 @@ def main():
 
     st.image("forhire.jpg")
     
-    title = st.selectbox('Job Title', ["General Manager", "Graphic Designer", "Chief Financial Officer", "Software Developers"])
-    jobdescription = st.selectbox("Job Description", ["""The Armenian Branch Office of the Open Society
-Institute Assistance Foundation is seeking applications for the position
-of Chief Accountant/ Finance Assistant. The Chief Accountant/ Finance
-Assistant will be responsible for all transactions, connected with grant
-payments, administrative expenses."
-""", """"Synergy International Systems, Inc./Armenia is
-currently seeking self-motivated individuals to join our quality
-assurance team. The ideal candidate will meet the following basic
-requirements:"
-""", """"The United Nations World Food Programme is seeking an
-Admin/ Finance Clerk for temporary assistance."
-"""])
-    requiredqual = st.selectbox("Required Qualification", ["""
-    "- Bachelor's Degree; Master's is preferred;
-- Excellent skills in spoken and written English and Armenian languages;
-- Past English to Armenian translation and Armenian to English
-translation experience;
-- Good communication and public speaking skills;
-- Ability to work independently and as part of a team.
-REMUNERATION:  Commensurate with experience."
-""", """"- Masters degree with minimum of seven years of senior project
-management experience with nonprofit organizations in an international
-setting; and three years of experience as chief of party managing not
-less than ten staff persons;
-- Experience with development of water user associations, NGO
-strengthening programs, and USAID funded projects;
-- Excellent ability to represent the project to donors and partners;
-- Proven ability to direct all aspects of office operations, grant and
-contract administration, procurement, and financial and personnel
-management;
-- Demonstrated diplomacy, team-orientation management, and ability to
-develop and maintain collaborative, team relationships in a fast-paced
-work environment;
-- Excellent written and oral communications skills, and working
-knowledge of computer word-processing, spreadsheet programs, and e-mail.
-PREFERRED QUALIFICATIONS:  
-- Previous experience in Central Asia and NIS;
-- Knowledge of Russian language is a plus."
-""", """"- Possession of personal vehicle, valid driver's license, and proved
-5-year driving experience;
-- Good communication skills;
-- Good organizational skills and diligent attention to details
-associated with documenting activities to maintain accurate and complete
-job-related records;
-- Good knowledge of logistics and working knowledge of transportation
-systems.
-- Written and spoken proficiency in Armenian, and Russian.
-- Computer literacy, including knowledge of and experience with word
-processors (MS Word), spreadsheets (Excel), databases (MS Access), and
-electronic mail;
-- Knowledge of, and ability to work with a variety of governmental and
-non-governmental organizations;
-- Mobility and desire to travel extensively;
-- Willingness to work long or unusual hours/week-ends unexpectedly in
-order to receive and distribute humanitarian supplies and to meet
-programmatic goals and objectives;
-- Willingness and ability to work in a smoke-free environment.
-REMUNERATION:  Counterpart International offers competitive salaries and
-benefits comparable to standards of international NGO community in
-Armenia. Salary is commensurate with experience. Counterpart is an equal
-opportunity organization that strives for diversity and employs
-qualified personnel without regard to gender, race, physical disability,
-religion, or ethnicity."
-"""])
-    jobrequirment =  st.selectbox("Job requirement", ["""
-    "- Network monitoring and administration;
-- Database administration (MS SQL 2000)."
-""", """
-"Consultant will develop a clear and thorough
-understanding of a certain product's local consumption and in future
-years consumption in neighboring countries. To do this he/she will
-prepare a clear analysis of the national and regional supply and demand
-of this and related consumer products. The analysis should answer the
-following questions concerning:
-- Supply and Demand Situation;
-- Economic Analysis of Canning and/or packaging of a new product  in
-Armenia;
-- Market Introduction and Acceptability Procedures."
-""", """
-"- Testing software at all levels;
-- Analyzing and reporting test results;
-- Working independently with the aim of creating a test environment;
-- Creating and maintaining test definitions and specifications;
-- Automating test procedures and writing test automation scripts;
-- Creating templates based on test results;
-- Analyzing software performance and reporting data metrics;
-- Developing best-case test scenarios;
-- Debugging, analyzing and fixing application problems/ issues."
-"""])
-    
-    aboutc =  st.selectbox("About Company", ["""
-    "The International Research & Exchanges Board (IREX) is
-a US-Based private, non-profit organization. The IREX Armenia Yerevan
-office was established in 1992 and is a place in Armenia where
-interested individuals can obtain up-to-date information on study,
-research, and professional internship opportunities in the Unites
-States.
-IREX Yerevan collaborates with national government branches, local and
-international NGOs and institutions of higher education in the promotion
-of IREX- administered research and professional programs. The goal of
-these programs is to make American academic and professional experiences
-available to qualified individuals."
-""", """
-"The Media Diversity Institute (MDI) is a London-based
-charitable organization specializing in media training. It is
-implementing a three-year project in the South Caucasus, working with
-the media, journalism schools and local NGOs. The project aims to create
-deeper public understanding of diversity, minority groups and human
-rights."
-""", """
-"ARQELL CJSC is a multidisciplinary manufacturing firm,
-whereby its infrastructure requires diverse disciplines to arrive to the
-company's paramount objective of manufacturing turnkey flexo graphic
-printing machines and miscellaneous equipment used in the converting
-industry."
-""", """
-"Interagent LLC is a distributor of several multinational
-confectionary producing companies."
-"""])
-    company =  st.selectbox("Company",["""
-    AMERIA Investment Consulting Company
-""","""
-International Research & Exchanges Board (IREX)
-""","""
-International Research & Exchanges Board (IREX)
-""", """
-NetCall Communications
-""","""Armenia TV
-"""])
-    action = st.selectbox("Action", ["Word Cloud", "Classification"])
-    word = ''
-    col = [title, jobrequirment,requiredqual,  jobdescription, aboutc, company]
-    class_data = word + ' '.join(col)
-    class_df = class_data
-    nlp = spacy.load('en_core_web_sm')
-    doc = nlp(class_df)
-    #Tokenization
-    tfidf_vect = TfidfVectorizer(ngram_range=(1,1), min_df = 0.01, max_df= 1.0, stop_words='english')
-    class_df = clean_data(class_df)
-    x_dtm = tfidf_vect.fit_transform([class_df])
-    xx_dtm = " ".join([x_dtm.lemma_ for x_dtm in doc])
-    df_clust = pd.DataFrame(xx_dtm.toarray(), columns=vectorizer.get_feature_names())
+    activity = ["Prediction", "NLP"]
+    choice = st.sidebar.selectbox("Select Activity", activity)
 
+    if choice == "Prediction":
+        st.info("Prediction with ML")
 
-    prediction = ''
-    if action == "Word Cloud":
-        if st.button('Prediction'):
+        jobdescribe = st.text_area("Enter Job Description", "Type Here")
+        all_models = ["Logistic Regression", 'Decision Trees', 'Random Forest', 'KNNeighbors']
+        model =  st.selectbox("Select Model", all_models)
+
+        # prediction_labels = [1: "IT JOB", 0: "NON-IT JOB"]
+
+        if st.button("Classify"):
+            st.text("Origin Text :: \n {}".format(jobdescribe))
+            jobdescribe = jobdescribe.toarray().reshape(1, -1)
+            text = clean_data(jobdescribe)
+            vectoriz =  TfidfVectorizer(ngram_range=(1,1), min_df=0.05, max_df=1.0)
+            token = vectoriz.fit_transform([jobdescribe])
             nlp = spacy.load('en_core_web_sm')
             # Parse the sentence using the loaded 'en' model object `nlp`
-            doc = nlp(jobdescription)
-            #Tokenization using count vectorizer
-            count_vect = CountVectorizer(ngram_range=(1,1))
-            jobdescription = clean_data(jobdescription)
-            token = count_vect.fit_transform([jobdescription])
-            title_df = " ".join([token.lemma_ for token in doc])
-            title_df = lemma(title_df)
-            title_df = title_df.join(title_df for title_df in title_df.split() if title_df not in stop)
-            temp_df =  pd.DataFrame(token.toarray(), columns=count_vect.get_feature_names())
+            doc = nlp(text)
+            x_dtm =  " ".join([token.lemma_ for token in doc])
+            # df_clust = pd.DataFrame(x_dtm, columns=vectorizer.get_feature_names())
 
-            count_df = temp_df.apply(lambda x : x.sum())
-            count_df = pd.DataFrame(count_df).reset_index()
-            count_df.columns = ['Word', 'Count']
-            top_jobs = count_df.sort_values(by='Count', ascending=False)
-            # plot the WordCloud image to show top 50 type of demanding jobs in armenia     
-            wordcloud = WordCloud(width = 1000, height = 500).generate(' '.join(top_jobs[:50].Word))
-            fig = plt.figure(figsize = (8, 8), facecolor = None) 
-            plt.imshow(wordcloud) 
-            plt.axis("off") 
-            plt.tight_layout(pad = 0) 
-            plt.show()
-            st.write(fig)
+            if model == "Random Forest":
+                predictor = rf_model.predict([x_dtm])
+                if (prediction == 1):
+                    st.success("This is an IT job")
+                elif (prediction == 0):
+                    st.warning("This is not an IT job")
+ 
 
-    elif action == "Classification":
-        if st.button('Prediction'):
-            prediction = loaded_model.predict(df_clust)
-            if (prediction == 0):
-                st.success("This is an IT job")
-            elif (prediction == 1):
-                st.warning("This is not an IT job")
+            if model == "Logistic Regression":
+                predictor = lr_model.predict([x_dtm])
+                if (prediction == 1):
+                    st.success("This is an IT job")
+                elif (prediction == 0):
+                    st.warning("This is not an IT job")
+
+            if model == "Decision Trees":
+                predictor = rf_model.predict([x_dtm])
+                if (prediction == 1):
+                    st.success("This is an IT job")
+                elif (prediction == 0):
+                    st.warning("This is not an IT job")
+            
+            # if model == "KNeighbors Classifier":
+            #     predictor = rf_model.predict(vect)
+
+    elif choice == "NLP":
+            st.info("Natural Language Processing of Text")
+            jobdescription = st.text_area("Job Description","Type Here")
+            nlp_task = ["Word Cloud", "Tokenization","Lemmatization"]
+            task_choice = st.selectbox("Choose NLP Task",["Word Cloud"])
+            if st.button("Analyze"):
+                st.info("Original Text::\n{}".format(jobdescription))
+                nlp = spacy.load('en_core_web_sm')
+            # Parse the sentence using the loaded 'en' model object `nlp`
+                doc = nlp(jobdescription)
+                #Tokenization using count vectorizer
+                count_vect = CountVectorizer(ngram_range=(1,1))
+                jobdescription = clean_data(jobdescription)
+                token = count_vect.fit_transform([jobdescription])
+                title_df = " ".join([token.lemma_ for token in doc])
+                title_df = lemma(title_df)
+                stop = nltk.corpus.stopwords.words('english')
+                stop.extend(['armenian', 'armenia', 'job', 'title', 'position', 'location', 'responsibilities', 'application',
+                'procedures', 'deadline', 'required','qualifications', 'renumeration', 'salary', 'date', 'company', 'llc'])
+                title_df = title_df.join(title_df for title_df in title_df.split() if title_df not in stop)
+                temp_df =  pd.DataFrame(token.toarray(), columns=count_vect.get_feature_names())
+
+                count_df = temp_df.apply(lambda x : x.sum())
+                count_df = pd.DataFrame(count_df).reset_index()
+                count_df.columns = ['Word', 'Count']
+                top_jobs = count_df.sort_values(by='Count', ascending=False)
+                # plot the WordCloud image to show top 50 type of demanding jobs in armenia     
+                wordcloud = WordCloud(width = 1000, height = 500).generate(' '.join(top_jobs[:50].Word))
+                fig = plt.figure(figsize = (8, 8), facecolor = None) 
+                plt.imshow(wordcloud) 
+                plt.axis("off") 
+                plt.tight_layout(pad = 0) 
+                plt.show()
+                st.write(fig)
+
+
+    # prediction = ''
+    # if action == "Word Cloud":
+    #     if st.button('Prediction'):
+            
+
+    # elif action == "Classification":
+    #     if st.button('Prediction'):
+    #         prediction = loaded_model.predict(df_clust)
+    #         if (prediction == 0):
+    #             st.success("This is an IT job")
+    #         elif (prediction == 1):
+    #             st.warning("This is not an IT job")
 
 if __name__ == '__main__':
     main()
