@@ -57,7 +57,7 @@ def main():
 
     st.image("forhire.jpg")
     
-    activity = ["Prediction", "NLP"]
+    activity = ["NLP", "Prediction"]
     choice = st.sidebar.selectbox("Select Activity", activity)
 
     if choice == "Prediction":
@@ -65,7 +65,7 @@ def main():
 
         jobdescribe = st.text_area("Enter Job Description", "Type Here")
         all_models = ["Logistic Regression", 'Decision Trees', 'Random Forest', 'KNNeighbors']
-        model =  st.selectbox("Select Model", all_models)
+        model =  st.selectbox("Select Model", "Random Forest")
 
         # prediction_labels = [1: "IT JOB", 0: "NON-IT JOB"]
 
