@@ -10,6 +10,7 @@ import nltk
 from wordcloud import WordCloud 
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from nltk.stem import WordNetLemmatizer
+from nltk import sent_tokenize
 
 nltk.download('averaged_perceptron_tagger')
 nltk.download('omw-1.4')
@@ -52,7 +53,7 @@ def lemma(text):
 def main():
     st.title("Armenian Job Posting Prediction")
     st.markdown("A Project by team PP22/J609 Pyspark")
-    st.header("This model should also be deployed so job seekers can quickly digest online job descriptions, get keywords, and incorporate them into their applications.")
+    st.header("A model for job seekers to digest online job descriptions, get keywords and incorporate them into their applications.")
 
     st.image("forhire.jpg")
     
@@ -69,19 +70,39 @@ def main():
         # prediction_labels = [1: "IT JOB", 0: "NON-IT JOB"]
 
         if st.button("Classify"):
-            st.text("Origin Text :: \n {}".format(jobdescribe))
-            jobdescribe = jobdescribe.toarray().reshape(1, -1)
-            text = clean_data(jobdescribe)
-            vectoriz =  TfidfVectorizer(ngram_range=(1,1), min_df=0.05, max_df=1.0)
-            token = vectoriz.fit_transform([jobdescribe])
-            nlp = spacy.load('en_core_web_sm')
-            # Parse the sentence using the loaded 'en' model object `nlp`
-            doc = nlp(text)
-            x_dtm =  " ".join([token.lemma_ for token in doc])
-            # df_clust = pd.DataFrame(x_dtm, columns=vectorizer.get_feature_names())
+            st.info("Origin Text :: \n {}".format(jobdescribe))
+            #jobdescribe = jobdescribe.toarray().reshape(1, -1)
+            texts = clean_data(jobdescribe)
+            # texts = lemma(texts)
+            # texts = texts.split(" ")
+            stop = nltk.corpus.stopwords.words('english')
+            stop.extend(['armenian', 'armenia', 'job', 'title', 'position', 'location', 'responsibilities', 'application',
+                'procedures', 'deadline', 'required','qualifications', 'renumeration', 'salary', 'date', 'company', 'llc'])
+            # texts = text.apply(lambda x : ' '.join(x for x in x.split() if x not in stop))
+            # r_text = []
+            # for text in texts:
+            #     if text not in stop:
+            #         r_text.append(text)
+            # vectoriz =  TfidfVectorizer(ngram_range=(1,1), min_df=0.05, max_df=1.0, stop_words='english')
+            # x_dtm = vectoriz.fit_transform(r_text)
+            # nlp = spacy.load('en_core_web_sm')
+            # # Parse the sentence using the loaded 'en' model object `nlp`
+            # #doc = nlp(text)
+            # # x_dtm =  " ".join([token.lemma_ for token in doc])
+            # df_clust = pd.DataFrame(x_dtm.toarray())
+            # df_clust = df_clust.values.reshape(1, -1)
+            vect = TfidfVectorizer()
+            data = sent_tokenize(texts)
+            new = vectorizer.transform(data)
+            # new = new.transpose()
+            new = new.reshape(1, -1)
+            nx, ny = new.shape
+            new_data = new.reshape((nx, ny))
+            df_clust = pd.DataFrame(new_data, columns=vectorizer.get_feature_names())
+            # df_clust.drop_duplicates(drop=True, inplace=True)
 
             if model == "Random Forest":
-                predictor = rf_model.predict([x_dtm])
+                predictor = rf_model.predict(new)
                 if (prediction == 1):
                     st.success("This is an IT job")
                 elif (prediction == 0):
@@ -89,14 +110,14 @@ def main():
  
 
             if model == "Logistic Regression":
-                predictor = lr_model.predict([x_dtm])
+                predictor = lr_model.predict(new)
                 if (prediction == 1):
                     st.success("This is an IT job")
                 elif (prediction == 0):
                     st.warning("This is not an IT job")
 
             if model == "Decision Trees":
-                predictor = rf_model.predict([x_dtm])
+                predictor = rf_model.predict(new)
                 if (prediction == 1):
                     st.success("This is an IT job")
                 elif (prediction == 0):
@@ -121,9 +142,6 @@ def main():
                 token = count_vect.fit_transform([jobdescription])
                 title_df = " ".join([token.lemma_ for token in doc])
                 title_df = lemma(title_df)
-                stop = nltk.corpus.stopwords.words('english')
-                stop.extend(['armenian', 'armenia', 'job', 'title', 'position', 'location', 'responsibilities', 'application',
-                'procedures', 'deadline', 'required','qualifications', 'renumeration', 'salary', 'date', 'company', 'llc'])
                 title_df = title_df.join(title_df for title_df in title_df.split() if title_df not in stop)
                 temp_df =  pd.DataFrame(token.toarray(), columns=count_vect.get_feature_names())
 
