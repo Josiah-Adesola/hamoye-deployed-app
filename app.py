@@ -64,8 +64,8 @@ def main():
         st.info("Prediction with ML")
 
         jobdescribe = st.text_area("Enter Job Description", "Type Here")
-        all_models = ["Logistic Regression", 'Decision Trees', 'Random Forest', 'KNNeighbors']
-        model =  st.selectbox("Select Model", "Random Forest")
+        all_models = ['Random Forest']
+        model =  st.selectbox("Select Model", all_models)
 
         # prediction_labels = [1: "IT JOB", 0: "NON-IT JOB"]
 
@@ -96,13 +96,11 @@ def main():
             new = vectorizer.transform(data)
             # new = new.transpose()
             new = new.reshape(1, -1)
-            nx, ny = new.shape
-            new_data = new.reshape((nx, ny))
-            df_clust = pd.DataFrame(new_data, columns=vectorizer.get_feature_names())
+            df_clust = pd.DataFrame(new.toarray(), columns=vectorizer.get_feature_names())
             # df_clust.drop_duplicates(drop=True, inplace=True)
 
             if model == "Random Forest":
-                predictor = rf_model.predict(new)
+                predictor = rf_model.predict([new])
                 if (prediction == 1):
                     st.success("This is an IT job")
                 elif (prediction == 0):
@@ -136,6 +134,9 @@ def main():
                 nlp = spacy.load('en_core_web_sm')
             # Parse the sentence using the loaded 'en' model object `nlp`
                 doc = nlp(jobdescription)
+                stop = nltk.corpus.stopwords.words('english')
+                stop.extend(['armenian', 'armenia', 'job', 'title', 'position', 'location', 'responsibilities', 'application',
+                'procedures', 'deadline', 'required','qualifications', 'renumeration', 'salary', 'date', 'company', 'llc'])
                 #Tokenization using count vectorizer
                 count_vect = CountVectorizer(ngram_range=(1,1))
                 jobdescription = clean_data(jobdescription)
